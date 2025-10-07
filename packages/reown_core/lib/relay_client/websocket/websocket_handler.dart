@@ -66,8 +66,8 @@ class WebSocketHandler implements IWebSocketHandler {
     // Route outgoing messages through the output controller
     outputController.stream.listen(
       (data) => _socket!.sink.add(data),
-      onError: (error) => _socket!.sink.addError(error),
-      onDone: () => _socket!.sink.close(),
+      onError: (error) => _socket?.sink.addError(error),
+      onDone: () => _socket?.sink.close(),
     );
 
     _channel = StreamChannel(

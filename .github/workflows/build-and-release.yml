@@ -1,0 +1,103 @@
+name: Build and Release
+
+on:
+  push:
+    branches: [ "develop" ]
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Unshallow repository
+      run: |
+        git fetch --unshallow
+        git fetch -a
+
+    - name: Set up Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.32.0'
+
+    - name: Generate all
+      run: |
+        ./scripts/generate_all.sh
+    
+    - name: Setup rust
+      run: |
+        rustup target add armv7-linux-androideabi
+        rustup target add aarch64-linux-android
+        rustup target add x86_64-linux-android
+
+    - name: Build native dependencies
+      run: |
+        ./scripts/build_native_deps.sh
+    
+    - name: Get version tag
+      id: get_version
+      run: |
+        git fetch -a
+        LATEST_TAG=$(git tag -l "v*.*.*" | grep -E "^v[0-9]+\.[0-9]+\.[0-9]+$" | sort -V | tail -n1)
+        
+        if [ -z "$LATEST_TAG" ]; then
+          VERSION="v0.0.1"
+        else
+          COMMIT_COUNT=$(git rev-list ${LATEST_TAG}..HEAD --count)
+          
+          if [ "$COMMIT_COUNT" = "0" ]; then
+            VERSION="$LATEST_TAG"
+          else
+            BASE_VERSION=${LATEST_TAG#v}
+            IFS='.' read -r MAJOR MINOR PATCH <<< "$BASE_VERSION"
+            
+            NEW_PATCH=$((PATCH + COMMIT_COUNT))
+            VERSION="v${MAJOR}.${MINOR}.${NEW_PATCH}"
+          fi
+        fi
+        
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        
+        if git describe --exact-match --tags HEAD >/dev/null 2>&1; then
+          echo "is_prerelease=false" >> $GITHUB_OUTPUT
+          echo "release_name=Release $VERSION" >> $GITHUB_OUTPUT
+        else
+          echo "is_prerelease=true" >> $GITHUB_OUTPUT
+          echo "release_name=Pre-release $VERSION" >> $GITHUB_OUTPUT
+        fi
+    
+    - name: Free storage
+      run: |
+        rm -rf scripts/yttrium 
+    - name: Create tarball
+      run: |
+        tar -czf ../reown_flutter-${{ steps.get_version.outputs.version }}.tar.gz \
+          --exclude='.git' \
+          --exclude='.dart_tool' \
+          --exclude='.fvm' \
+          --exclude='build' \
+          .
+        mv ../reown_flutter-${{ steps.get_version.outputs.version }}.tar.gz .
+    
+    - name: Create Release
+      if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ steps.get_version.outputs.version }}
+        name: ${{ steps.get_version.outputs.release_name }}
+        prerelease: ${{ steps.get_version.outputs.is_prerelease }}
+        files: reown_flutter-${{ steps.get_version.outputs.version }}.tar.gz
+        generate_release_notes: true
+        body: |
+          ## Reown Flutter
+
+          This .tar.gz contains Reown Flutter SDK with prebuilt dependencies intended to be used on CI/CD pipelines.
+
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

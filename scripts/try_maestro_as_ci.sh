@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -x -e
+
 # Check if both PROJECT_IDs are provided
 if [ -z "$1" ] || [ -z "$2" ]; then
     echo "Error: Both WALLET_PROJECT_ID and DAPP_PROJECT_ID are required"

@@ -1,5 +1,7 @@
 # **Reown - Flutter**
 
+> NOTE: This is not official package, this package forked before the license change and therefore remains free to use. If you want to use reown's official package go to [reown-com/reown_flutter](https://github.com/reown-com/reown_flutter).
+
 The communications protocol for web3, Reown brings the ecosystem together by enabling hundreds of wallets and apps to securely connect and interact. This repository contains Flutter implementation of WalletConnect protocol for Flutter applications.
 
 ## Published SDKs

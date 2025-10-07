@@ -80,7 +80,7 @@ android {
 def yttriumVersion = project.hasProperty("yttriumCiVersion") ? project.getProperty("yttriumCiVersion") : "0.9.4"
 
 dependencies {
-    implementation("net.java.dev.jna:jna:5.15.0@aar")
+    implementation("net.java.dev.jna:jna:5.17.0@aar")
     implementation("com.github.reown-com:yttrium:$yttriumVersion")
 
     testImplementation("org.jetbrains.kotlin:kotlin-test")

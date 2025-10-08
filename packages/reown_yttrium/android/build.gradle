@@ -56,13 +56,6 @@ android {
         }
     }
 
-    packaging {
-        jniLibs.pickFirsts.add("lib/arm64-v8a/libuniffi_yttrium.so")
-        jniLibs.pickFirsts.add("lib/armeabi-v7a/libuniffi_yttrium.so")	        
-        jniLibs.pickFirsts.add("lib/x86_64/libuniffi_yttrium.so")
-        jniLibs.pickFirsts.add("lib/**/libjnidispatch.so")
-    }
-
     testOptions {
         unitTests.all {
             useJUnitPlatform()
@@ -81,7 +74,7 @@ def yttriumVersion = project.hasProperty("yttriumCiVersion") ? project.getProper
 
 dependencies {
     implementation("net.java.dev.jna:jna:5.17.0@aar")
-    implementation("com.github.reown-com:yttrium:$yttriumVersion")
+    implementation(files("../../../android-release.aar"))
 
     testImplementation("org.jetbrains.kotlin:kotlin-test")
     testImplementation("org.mockito:mockito-core:5.0.0")

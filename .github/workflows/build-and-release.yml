@@ -39,6 +39,11 @@ jobs:
     - name: Build native dependencies
       run: |
         ./scripts/build_native_deps.sh
+    - name: Build Kotlin dependencies
+      run: |
+        pushd scripts/yttrium
+          ./generate_kotlin_locally.sh
+        popd
     
     - name: Get version tag
       id: get_version

@@ -59,3 +59,4 @@ run_tests_all.sh
 
 scripts/yttrium
 libuniffi_yttrium.so
+*.aar

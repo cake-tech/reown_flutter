@@ -79,14 +79,17 @@ jobs:
     
     - name: Free storage
       run: |
-        rm -rf scripts/yttrium 
+        cd scripts/yttrium
+        cargo clean
+    - name: Optimize git repo
+      run: |
+        git reflog expire --all --expire=now
+        git gc --prune=now --aggressive
     - name: Create tarball
       run: |
         tar -czf ../reown_flutter-${{ steps.get_version.outputs.version }}.tar.gz \
-          --exclude='.git' \
           --exclude='.dart_tool' \
           --exclude='.fvm' \
-          --exclude='build' \
           .
         mv ../reown_flutter-${{ steps.get_version.outputs.version }}.tar.gz .
     
